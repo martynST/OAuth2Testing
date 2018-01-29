@@ -1,9 +1,23 @@
-var http = require('http');
+//Dependencies
+const express = require("express");
+const open = require("open");
+const path = require("path");
+const app = express();
+const port = 8080;
+const cors = require('cors');
 
-http.createServer(function (req, res) {
-    
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.write('<script>location.replace("index.html")</script>')
-    res.end();
-    
-}).listen(process.env.PORT || 8080);
+
+//Serve all the files in the folder as static assets
+app.use(express.static("./"));
+app.use(cors());
+app.options('*', cors())
+app.get('./', function (req, res, next) {
+    res.json({ msg: 'This is CORS-enabled for all origins!' })
+});
+
+
+//Start server
+app.listen(port, (err) => {
+    if (err) { console.log(err); }
+    else { open(`http://localhost:${port}`) }
+});

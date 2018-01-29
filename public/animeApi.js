@@ -1,100 +1,65 @@
-const apiUrl = "https://anilist.co/api/";
-import {requestToken} from "./testing.js"
+const apiUrl = "https://anilist.co/api";
+const apiSearch = "https://anilist.co/api/anime/search"
+const apiAnime = "https://anilist.co/api/anime"
 
-export function getToken() {
-  return requestToken()
+let data = {};
+
+export async function requestToken() {
+
+  let promise = fetch("https://anilist.co/api/auth/access_token?grant_type=client_credentials&client_id=martynt-sfop8&client_secret=LJd4O13TQZeBZi79Gb05", {
+    method: "POST"
+  });
+
+  let result = await promise;
+  let promise2 = result.json();
+  data = await promise2;
+  return data;
 }
 
-/*
-function token() {
-  const request = new Request(apiUrl+"/auth/authorize",{
-    method: "POST",
-
+export async function getAnimeSearch(animeName) {
+  let promise = fetch(`${apiSearch}/${animeName}`, {
+    method: "GET",
+    "headers": {
+      Authorization: `${data.token_type} ${data.access_token}`
+    }
   })
+
+  let result = await promise;
+  let promise2 = result.json();
+  let result2 = await promise2;  
+  return result2;
 }
 
-async function getDets(showName){
-    let promise = new Promise((resolve, reject) => {
-        fetch(`${pokemonURL}/${id}`);
-    });
+export async function getAnime(ids) {
+  let promise = [];
+  for (let i = 0; i < ids.length; i++) {
+    promise.push(fetch(`${apiAnime}/${ids[i]}`, {
+      method: "GET",
+      "headers": {
+        Authorization: `${data.token_type} ${data.access_token}`
+      }
+    }))
+  }
 
-    let result = await promise;
+  let result = await Promise.all(promise);
+  let promise2 = [];
+  for (let i = 0; i < ids.length; i++) {
+    promise2.push(
+      result[i].json()
+    );
+  }
 
-    console.log("result");
+  let result2 = await Promise.all(promise2);
+
+
+  let anime = []
+  for (let i = 0; i < ids.length; i++) {
+    anime[i] = {
+      id: `${result2[i].id}`,
+      title: `${result2[i].title_english}`,
+      status: `${result2[i].airing_status}`,
+      episodes: `${result2[i].duration}`
+    }
+  }
+  return anime
 }
-
-var data = null;
-
-var http = new XMLHttpRequest();
-http.withCredentials = true;
-
-http.addEventListener("readystatechange", function () {
-  if (this.readyState === 4) {
-    console.log(this.responseText);
-  }
-});
-
-http.open("POST", "https://anilist.co/api/auth/access_token?grant_type=client_credentials&client_id=martynt-sfop8&client_secret=LJd4O13TQZeBZi79Gb05");
-http.setRequestHeader("Cache-Control", "no-cache");
-http.setRequestHeader("Postman-Token", "85e63f8f-cbff-7c4a-c26a-cd464dd4191c");
-
-http.send(data);
-
-
-var http = require("https");
-
-var options = {
-  "method": "POST",
-  "hostname": [
-    "anilist",
-    "co"
-  ],
-  "path": [
-    "api",
-    "auth",
-    "access_token"
-  ],
-  "headers": {
-    "Cache-Control": "no-cache",
-    "Postman-Token": "7fe49e77-15b5-9487-ec87-56749aebf337"
-  }
-};
-
-var req = http.request(options, function (res) {
-  var chunks = [];
-
-  res.on("data", function (chunk) {
-    chunks.push(chunk);
-  });
-
-  res.on("end", function () {
-    var body = Buffer.concat(chunks);
-    console.log(body.toString());
-  });
-});
-
-req.end();
-
-/*
-var request = require("request");
-
-var options = { method: 'POST',
-  url: 'https://anilist.co/api/auth/access_token',
-  qs: 
-   { grant_type: 'client_credentials',
-     client_id: 'martynt-sfop8',
-     client_secret: 'LJd4O13TQZeBZi79Gb05' },
-  headers: 
-   { 'Postman-Token': '03535782-a934-4653-5bdb-7b55978505d2',
-     'Cache-Control': 'no-cache' } };
-
-request(options, function (error, response, body) {
-  if (error) throw new Error(error);
-
-  console.log(body);
-});
-
-POST /api/auth/access_token?grant_type=client_credentials&amp;client_id=martynt-sfop8&amp;client_secret=LJd4O13TQZeBZi79Gb05 HTTP/1.1
-Host: anilist.co
-Cache-Control: no-cache
-Postman-Token: e9d6b8f1-7f79-6898-937f-7b40b90812ca*/
